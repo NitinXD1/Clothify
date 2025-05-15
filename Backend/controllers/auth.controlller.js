@@ -116,9 +116,16 @@ export const login = async (req,res) =>{
                 message : "User logged in Successfully"
             })
         }
+        else{
+            res.status(403).json(
+                {
+                    message : "Incorrect password or email , Please Try Again"
+                }
+            )
+        }
 
     } catch (error) {
-        console.log("Error while logging In")
+        console.log("Error in login controller")
         res.status(500).json({message : error.message})
     }
 }
@@ -145,7 +152,52 @@ export const logout = async (req,res) =>{
         })
     }
     catch(err){
-        throw new Error(err.message)
+        console.log("Error in Logout controller")
+        res.status(500).json(
+            {
+                message : "Server Error", error : err.message
+            }
+        )
     }
 }
 
+//refreshing the access token after each expiration
+export const refreshToken = async (req,res) => {
+    try {
+        
+        const refreshToken = req.cookies.refreshToken
+
+        if(!refreshToken){
+            return res.status(401).json({message : "No refresh token found"})
+        }
+
+        const decodedRefreshToken = jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET)
+        
+        const storeToken = await redis.get(`refreshToken:${decodedRefreshToken.id}`)
+
+        if(refreshToken !== storeToken){
+            return res.status(401).json({
+                message : "Invalid refresh Token"
+            })
+        }
+        
+        const {accessToken} = await generateTokens(decodedRefreshToken.id)
+
+        res.cookie("accessToken",accessToken,{
+            httpOnly : true,
+            secure : process.env.NODE_ENV === "production",
+            sameSite : "strict",
+            maxAge : 15 * 60 * 1000,
+        })
+
+        return res.status(200).json({ message: "Access token refreshed" });
+        
+    } catch (error) {
+        console.log("Access token controlled error",error.message)
+        return res.status(400).json({message : "Error while refreshing the access token"})
+    }
+}
+
+// export const getProfile = async (req,res) => {
+    
+// }
