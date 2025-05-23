@@ -79,7 +79,7 @@ export const updateQuantity = async(req,res) => {
 
 export const getCartProducts = async(req,res) => {
     //can also use populate for easier implementation
-    try {
+    try {   
         const productIds = req.user.cartItems.map(item => item.product);
         const products = await Product.find({_id : {$in : productIds}});
         
@@ -88,7 +88,7 @@ export const getCartProducts = async(req,res) => {
             return {...product.toJSON() ,quantity : item.quantity}
         } )
 
-        res.status(200).json(cartItems)
+        res.status(200).json({cartItems})
 
     } catch (error) {
         console.log("Error in getting all the cart Items controller",error.message)

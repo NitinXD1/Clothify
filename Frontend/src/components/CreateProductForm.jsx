@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, Upload, Loader } from "lucide-react";
 import { useProductStore } from "../stores/useProductStore";
@@ -14,12 +14,17 @@ const CreateProductForm = () => {
 		image: "",
 	});
 
-	const { createProduct, loading } = useProductStore();
+	const { createProduct, loading , fetchAllProducts } = useProductStore();
+
+	useEffect( () => {
+		fetchAllProducts()
+	} , [fetchAllProducts])
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
 			await createProduct(newProduct);
+			// console.log(newProduct)
 			setNewProduct({ name: "", description: "", price: "", category: "", image: "" });
 		} catch {
 			console.log("error creating a product");
@@ -35,7 +40,7 @@ const CreateProductForm = () => {
 				setNewProduct({ ...newProduct, image: reader.result });
 			};
 
-			reader.readAsDataURL(file); // base64
+			reader.readAsDataURL(file);
 		}
 	};
 
@@ -159,4 +164,5 @@ const CreateProductForm = () => {
 		</motion.div>
 	);
 };
+
 export default CreateProductForm;

@@ -156,7 +156,7 @@ export const getProductByCategory = async(req,res) => {
     
         const products = await Product.find({category})
     
-        return res.status(200).json(products)
+        return res.status(200).json({products})
     } catch (error) {
         console.log("Error in getting Products by category controller")
         return res.status(500).json({message : "Internal Server Error",error : error.message})
@@ -178,12 +178,12 @@ export const toggleFeaturedProduct = async (req,res) => {
 
         product.isFeatured = !product.isFeatured
 
-        await product.save()
+        const updatedProduct = await product.save()
 
         await updateFeaturedProductCache()
 
         return res.status(200).json(
-            {
+            {   product : updatedProduct,
                 message : "Featured updated successfully"
             }
         )

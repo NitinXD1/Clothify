@@ -10,10 +10,20 @@ import { useUserStore } from './stores/useUserStore.js'
 import { useEffect } from 'react'
 import LoadingSpinner from './components/LoadingSpinner.jsx'
 import AdminPage from './pages/AdminPage.jsx'
+import CategoryPage from './pages/CategoryPage.jsx'
+import CartPage from './pages/CartPage.jsx'
+import { useCartStore } from './stores/useCartStore.js'
 
 function App() {
 
   const {user , checkAuth , checkingAuth} = useUserStore()
+  const {getCartItems} = useCartStore()
+
+  useEffect(() => {
+    if(user){
+      getCartItems()
+    }
+  },[user , getCartItems])
 
   useEffect(() => {
     checkAuth();
@@ -43,6 +53,8 @@ function App() {
           <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to='/' />} />
           <Route path="/login" element={!user ? <LogInPage/> : <Navigate to='/' />} />
           <Route path="/secret-dashboard" element={user && user.role === 'admin' ? <AdminPage /> : <LogInPage/>} />
+          <Route path="/category/:category" element={<CategoryPage />} />
+          <Route path="/cart" element={user ? <CartPage /> : <Navigate to='/login' />} />
           <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>
 

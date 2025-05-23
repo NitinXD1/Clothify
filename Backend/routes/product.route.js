@@ -16,7 +16,7 @@ router.route("/").get(protectRoute , adminRoute , getAllProducts)
 router.route("/featured").get(getFeaturedProducts)
 router.route("/recommendations").get(protectRoute , getRecommendedProducts)
 router.route("/category/:category").get(getProductByCategory)
-router.route("/createProduct").get(protectRoute , adminRoute , createProduct)
+router.route("/").post(protectRoute , adminRoute , createProduct)
 router.route("/:id").delete(protectRoute , adminRoute , deleteProduct)
 router.route("/:id").patch(protectRoute , adminRoute , toggleFeaturedProduct)
 

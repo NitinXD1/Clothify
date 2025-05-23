@@ -2,14 +2,13 @@ import React from 'react'
 import { ShoppingCart , UserPlus , LogIn , LogOut , Lock } from 'lucide-react'
 import {Link} from 'react-router-dom'
 import { useUserStore } from '../stores/useUserStore'
-// import { useUserStore } from "../stores/useUserStore";
-// import { useCartStore } from "../stores/useCartStore";
+import { useCartStore } from "../stores/useCartStore";
 
 const NavBar = () => {
 
     const {user , logout} = useUserStore()
     const isAdmin = user && user.role === "admin" 
-    const cart = [1]
+    const {cart} = useCartStore() 
 
 
   return (

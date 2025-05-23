@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "../lib/axios.js";
 import {toast} from "react-hot-toast";
+import { useCartStore } from "./useCartStore.js";
 
 export const useUserStore = create((set,get) => ({
     user:null,
@@ -37,6 +38,8 @@ export const useUserStore = create((set,get) => ({
 
             const res = await axios.post("/auth/login" , {email,password})
             set({user : res.data.user , loading : false})
+            toast.success("Logged In Successfully")
+            await useCartStore.getState().getCartItems()
         }
         catch(error){
             set({loading : false})

@@ -12,6 +12,6 @@ const router = Router()
 router.route("/").get(protectRoute , getCartProducts)
 router.route("/").post(protectRoute , addToCart)
 router.route("/").delete(protectRoute , removeAllFromCart)
-router.route("/").put(protectRoute , updateQuantity)
+router.route("/:id").put(protectRoute , updateQuantity)
 
 export default router

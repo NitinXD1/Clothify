@@ -22,7 +22,7 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("create") 
 
   return (
-    <div className='min-h-screen bg-gray-900 overflow-hidden text-white relative'>
+    <div className='min-h-screenoverflow-hidden text-white relative'>
       <div className='relative z-10 container mx-auto px-4 py-16'>
         <motion.h1
           className='text-4xl font-bold text-emerald-400 mb-4 text-center'
