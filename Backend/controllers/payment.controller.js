@@ -12,6 +12,7 @@ async function createStripeCoupon(discountPercentage) {
 }
 
 async function createNewCoupon(userId) {
+    await Coupon.findOneAndDelete({userId})
 
     const newCoupon = new Coupon({
         code: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
@@ -71,7 +72,7 @@ export const createCheckoutSession = async (req, res) => {
             payment_method_types: ["card"],
             line_items: lineItems,
             mode: "payment",
-            success_url: `${process.env.CLIENT_URL}/purchase-success?session-id={CHECKOUT_SESSION_ID}`,
+            success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
             discounts: stripeCouponId ? [{ coupon: stripeCouponId }] : [],
             metadata: {
@@ -107,44 +108,46 @@ export const checkoutSuccess = async (req,res) => {
         const {sessionId} = req.body
     
         const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+        if(session.payment_status !== 'paid'){
+            return res.status(400).json({ success: false, message: "Payment not completed." });
+        }  
     
-        if(session.payment_status === 'paid'){
-    
-            if(session.metadata.couponCode){
-                await Coupon.findOneAndUpdate(
-                    {
-                        code : session.metadata.couponCode,
-                        userId : session.metadata.userId,
-                    },
-                    {
-                        isActive : false
-                    }
-                )
-            }
-    
-            const products = JSON.parse(session.metadata.products)
-            const newOrder = await Order.create(
+        if(session.metadata.couponCode){
+            await Coupon.findOneAndUpdate(
                 {
-                    user : session.metadata.userId,
-                    products : products.map((p) => {
-                        return {
-                            product : p.id,
-                            price : p.price,
-                            quantity : p.quantity
-                        }
-                    }),
-                    totalAmount : session.amount_total / 100,
-                    stripeSessionId : sessionId
+                    code : session.metadata.couponCode,
+                    userId : session.metadata.userId,
+                },
+                {
+                    isActive : false
                 }
             )
+        }
     
-            return res.status(200).json(
-                {
+        const products = JSON.parse(session.metadata.products)
+        const newOrder = await Order.create(
+            {
+                user : session.metadata.userId,
+                products : products.map((p) => {
+                    return {
+                        product : p.id,
+                        price : p.price,
+                        quantity : p.quantity
+                    }
+            }),
+                totalAmount : session.amount_total / 100,
+                stripeSessionId : sessionId
+            }
+        )
+    
+        return res.status(200).json(
+            {
                     sucess : true,
                     message : "payment successfull , order created , and coupon deactivated if used",
                     orderId : newOrder._id,
-                })
-        }
+        })
+
     } catch (error) {
         console.log("Error in fetching successfull order controller")
         return res.status(500).json({message:"Error processing successfull checkout",error : error.message})
